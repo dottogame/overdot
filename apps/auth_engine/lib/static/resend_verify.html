@@ -1,0 +1,21 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <title>Verify | PopSquad</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <h3>Maho?</h3>
+        <p>That account either doesn't exist or has already been registered!</p>
+        <p>If you need a new verification email, please enter your email below and press "Re-send"</p>
+        <input type="text" id="target" placeholder="Email">
+        <button onclick="submit();">Re-send</button>
+        <p>If you need assistance, contact us at: <a href="support@psq.mcfish.space">support@psq.mcfish.space</a></p>
+        <script type="text/javascript">
+            function submit() {
+                target = document.getElementById("target").value;
+                window.location.href = "http://localhost/verify/gen/" + target;
+            }
+        </script>
+    </body>
+</html>
