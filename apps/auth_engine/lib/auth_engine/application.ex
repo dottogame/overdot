@@ -12,14 +12,14 @@ defmodule AuthEngine.Application do
     db_props = %{
       protocol: "http",
       hostname: "localhost",
-      database: "psq_user",
+      database: "dotto_user",
       port: 5984
     }
 
     lookup_db_props = %{
       protocol: "http",
       hostname: "localhost",
-      database: "psq_lookup",
+      database: "dotto_lookup",
       port: 5984
     }
 
