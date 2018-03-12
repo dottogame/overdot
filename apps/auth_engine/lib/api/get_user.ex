@@ -18,6 +18,7 @@ defmodule Api.GetUser do
 
   def sensor_user(user_lookup) do
     {status, user} = user_lookup
+    user = Poison.decode!(user)
 
     if status === :ok do
       %{
