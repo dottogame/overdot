@@ -2,7 +2,7 @@ defmodule AuthEngine.MailEngine.Emails do
   import Bamboo.Email
 
   def welcome_email(target, nick, code) do
-    link = "https://psq.mcfish.space/verify/" <> target <> "/" <> code
+    link = "https://dotto.mcfish.space/verify/" <> target <> "/" <> code
 
     html = """
     <html>
