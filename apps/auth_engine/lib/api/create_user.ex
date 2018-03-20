@@ -47,16 +47,16 @@ defmodule Api.CreateUser do
 
         response(:ok)
         |> set_header("content-type", "application/json")
-        |> set_body(Poison.encode!(%{s: "ok"}))
+        |> set_body("{\"s\": \"ok\"}")
       else
         response(:ok)
         |> set_header("content-type", "application/json")
-        |> set_body(Poison.encode!(%{s: "err"}))
+        |> set_body("{\"s\": \"err\"}")
       end
     else
       response(:ok)
       |> set_header("content-type", "application/json")
-      |> set_body(Poison.encode!(%{s: "err", c: "email already registered"}))
+      |> set_body("{\"s\": \"ok\", \"c\":\"email already registered\"}")
     end
   end
 end
