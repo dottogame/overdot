@@ -33,8 +33,6 @@ defmodule Api.SubmitScore do
       handle_packet(packet, state)
     end)
 
-    replay = compile()
-
     {[], state}
   end
 
@@ -92,7 +90,7 @@ defmodule Api.SubmitScore do
     %{
       score: score,
       mods: mods,
-      accuracy: acc,
+      acc: accuracy,
       id: UUID.uuid4(),
       time: System.system_time(:nanosecond)
     }
