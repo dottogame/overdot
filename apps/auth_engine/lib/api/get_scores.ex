@@ -21,7 +21,7 @@ defmodule Api.GetScores do
 
     if status == :ok do
       entry_obj = Poison.decode!(data)
-      entry_obj["scores"]
+      entry_obj["entries"]
     else
       []
     end
