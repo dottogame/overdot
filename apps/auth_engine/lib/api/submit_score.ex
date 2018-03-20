@@ -12,9 +12,9 @@ defmodule Api.SubmitScore do
       |> Couchdb.Connector.Reader.get(entry_id)
       |> extract_plays()
 
-    Map.put(state, :play_list, play_list)
-    Map.put(state, :entry_id, entry_id)
-    Map.put(state, :remaining_buffer, "")
+    state = Map.put(state, :play_list, play_list)
+    state = Map.put(state, :entry_id, entry_id)
+    state = Map.put(state, :remaining_buffer, "")
     {[], state}
   end
 
@@ -25,13 +25,10 @@ defmodule Api.SubmitScore do
       (state.remaining_buffer <> data)
       |> String.split("[")
 
-    # clear remaining_buffer
-    Map.put(state, :remaining_buffer, "")
-
-    # parse each complete packet and store left overs
-    Enum.each(packets, fn packet ->
-      handle_packet(packet, state)
-    end)
+    # clear remaining_buffer and parse each complete packet and store left overs
+    state =
+      Map.put(state, :remaining_buffer, "")
+      |> parse_loop(packets)
 
     {[], state}
   end
@@ -49,11 +46,13 @@ defmodule Api.SubmitScore do
       |> List.flatten()
 
     # update play list to have new entries list
-    Map.put(state.play_list, "entries", new_play_array)
+    play_list =
+      Map.put(state.play_list, "entries", new_play_array)
+      |> Poison.encode!()
 
     # push to db
-    state.track_db
-    |> Couchdb.Connector.Writer.create(state.play_list, state.entry_id)
+    state.score_db
+    |> Couchdb.Connector.Writer.create(play_list, state.entry_id)
 
     # send okay response
     response(:ok)
@@ -61,26 +60,33 @@ defmodule Api.SubmitScore do
     |> set_body("{\"s\": \"ok\"}")
   end
 
-  def handle_packet(packet, state) do
+  def parse_loop(state, [packet | packets]) do
+    state = handle_packet(state, packet)
+    parse_loop(state, packets)
+  end
+
+  def parse_loop(state, []), do: state
+
+  def handle_packet(state, packet) do
     if String.last(packet) == "]" do
       pack_segments =
         String.slice(packet, 0..-2)
         |> String.split(":")
 
+      # TODO: if writing replay to storage, then append
       # TODO: handle incorrect array size
       # handle header if sent
-      cond do
-        pack_segments[0] == "acc" ->
-          Map.put(state, :accuracy, pack_segments[1])
-
-        pack_segments[0] == "score" ->
-          Map.put(state, :score, pack_segments[1])
-
-        pack_segments[0] == "mods" ->
-          Map.put(state, :mods, pack_segments[1])
+      if Enum.at(pack_segments, 0) === "acc" do
+        Map.put(state, :accuracy, Enum.at(pack_segments, 1))
+      else
+        if Enum.at(pack_segments, 0) === "score" do
+          Map.put(state, :score, Enum.at(pack_segments, 1))
+        else
+          if Enum.at(pack_segments, 0) === "mods" do
+            Map.put(state, :mods, Enum.at(pack_segments, 1))
+          end
+        end
       end
-
-      # TODO: if writing replay to storage, then append
     else
       Map.put(state, :remaining_buffer, packet)
     end
@@ -103,8 +109,8 @@ defmodule Api.SubmitScore do
       Poison.decode!(play_list)
     else
       %{
-        entries: [],
-        top: 0
+        "entries" => [],
+        "top" => 0
       }
     end
   end
