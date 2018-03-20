@@ -1,5 +1,5 @@
 defmodule AuthEngine do
-  use Ace.HTTP.Service, port: 80, cleartext: true
+  use Ace.HTTP.Service, port: 85, cleartext: true
   use Raxx.Static, "./static"
 
   use Raxx.Router, [

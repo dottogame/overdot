@@ -5,6 +5,7 @@ defmodule Api.UpdateUser do
   def handle_request(req, state) do
     [_, id] = req.path
     user_data = Couchdb.Connector.Reader.get(state.db, id)
+    user_data = Poison.decode!(elem(user_data, 1))
     req_data = Poison.decode!(req.body)
 
     # update account data
