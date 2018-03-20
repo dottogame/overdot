@@ -10,8 +10,8 @@ defmodule AuthEngine do
     {%{method: :POST, path: ["user"]}, Api.CreateUser},
     {%{method: :GET, path: ["verify", "gen", _]}, Api.VerifyGen},
     {%{method: :GET, path: ["verify", _, _]}, Api.VerifyUser},
-    {%{method: :GET, path: ["user", _, "score", _]}, Api.GetScores},
-    {%{method: :POST, path: ["user", _, "score", _]}, Api.SubmitScore}
+    {%{method: :GET, path: ["score", _]}, Api.GetScores},
+    {%{method: :POST, path: ["score", _]}, Api.SubmitScore},
     {_, Api.NotFound}
   ]
 end

@@ -7,22 +7,27 @@ defmodule Api.SubmitScore do
     req_data = Poison.decode!(req.body)
 
     # extract user id and track id from url
-    [_, user_id, _, track_id] = req.path
-    entry_id = Enum.join([user_id, track_id], "")
+    [_, entry_id] = req.path
+
+    # TODO: submit replay file to be valiated/stored and ensure its valid/not hacked
+
+    # create entry for db from replay file values
+    replay = compile()
+    play = gen_play_entry(replay.score, replay.mods, replay.accuracy)
 
     # fetch the entry object from the db
-    entries =
+    play_list =
       state.score_db
       |> Couchdb.Connector.Reader.get(entry_id)
-      |> filter_scores()
+      |> extract_plays()
 
-    # TODO: validate new entry and ensure its valid/not hacked
-
-    # add entry and serialize
-    new_entries =
-      [entry | entries]
+    # append new play entry to array of play entries (performant way)
+    new_play_array =
+      [play | play_list["entries"]]
       |> List.flatten()
-      |> Poison.encode!()
+
+    # update play list to have new entries list
+    Map.put(play_list, "entries", new_play_array)
 
     # push to db
     Couchdb.Connector.Writer.create(state.track_db, new_entries, entry_id)
@@ -33,14 +38,26 @@ defmodule Api.SubmitScore do
     |> set_body("{\"s\": \"ok\"}")
   end
 
-  def filter_scores(user_lookup) do
-    {status, data} = user_lookup
+  def gen_play_entry(score, mods, accuracy) do
+    %{
+      score: score,
+      mods: mods,
+      accuracy: acc,
+      id: UUID.uuid4(),
+      time: System.system_time(:nanosecond)
+    }
+  end
+
+  def extract_plays(user_lookup) do
+    {status, play_list} = user_lookup
 
     if status == :ok do
-      entry_obj = Poison.decode!(data)
-      entry_obj["scores"]
+      Poison.decode!(play_list)
     else
-      []
+      %{
+        entries: [],
+        top: 0
+      }
     end
   end
 end

@@ -3,13 +3,13 @@ defmodule Api.GetScores do
 
   @impl Raxx.Server
   def handle_request(req, state) do
-    [_, user_id, _, track_id] = req.path
-    entry_id = Enum.join([user_id, track_id], "")
+    [_, entry_id] = req.path
 
     serialized_entries =
       state.score_db
       |> Couchdb.Connector.Reader.get(entry_id)
       |> filter_scores()
+      |> Poison.encode!()
 
     response(:ok)
     |> set_header("content-type", "application/json")
@@ -18,6 +18,12 @@ defmodule Api.GetScores do
 
   def filter_scores(user_lookup) do
     {status, data} = user_lookup
-    data["scores"]
+
+    if status == :ok do
+      entry_obj = Poison.decode!(data)
+      entry_obj["scores"]
+    else
+      []
+    end
   end
 end
