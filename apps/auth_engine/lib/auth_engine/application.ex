@@ -23,15 +23,24 @@ defmodule AuthEngine.Application do
       port: 5984
     }
 
+    track_db_props = %{
+      protocol: "http",
+      hostname: "localhost",
+      database: "dotto_track",
+      port: 5984
+    }
+
     # set up connectors
     Couchdb.Connector.Storage.storage_up(db_props)
     Couchdb.Connector.Storage.storage_up(lookup_db_props)
+    Couchdb.Connector.Storage.storage_up(track_db_props)
 
     children = [
       worker(AuthEngine, [
         %{
           db: db_props,
-          user_lookup: lookup_db_props
+          user_lookup: lookup_db_props,
+          track_db: track_db_props
         }
       ])
     ]
