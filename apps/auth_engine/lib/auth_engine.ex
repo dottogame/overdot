@@ -5,6 +5,7 @@ defmodule AuthEngine do
   use Raxx.Router, [
     {%{method: :GET, path: ["ping"]}, Api.Ping},
     {%{method: :POST, path: ["auth"]}, Api.Auth},
+    {%{method: :POST, path: ["auth", _, _]}, Api.AuthCheck},
     {%{method: :GET, path: ["user", _]}, Api.GetUser},
     {%{method: :POST, path: ["user", _]}, Api.UpdateUser},
     {%{method: :POST, path: ["user"]}, Api.CreateUser},
